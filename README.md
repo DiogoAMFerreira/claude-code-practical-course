@@ -98,3 +98,11 @@ Claude offers two options to rewind the changes made. Of course, if you are usin
 ```sh
 /rewind
 ```
+
+## Breaking line in your prompt
+
+To break line and write multiple lines in your prompt do "\ + Enter"
+
+## Refer to files in your prompt
+
+To refer to a specific file in your prompt use the @ symbol followed by the file or path to file
