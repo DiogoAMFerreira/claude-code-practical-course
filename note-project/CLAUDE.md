@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+We're building the app described in @SPECIFICATION.md. Read that file for general architectural tasks or to double-check the exact database structure, tech stack or application architecture.
+
+Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snippets.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
@@ -16,6 +20,7 @@ npm run lint     # Run ESLint
 This is a Next.js 16 app using the App Router (`app/` directory), React 19, TypeScript, and Tailwind CSS v4.
 
 **Key dependencies:**
+
 - **Tiptap** (`@tiptap/react`) — rich text editor for notes
 - **better-auth** — authentication library
 - **Zod** — schema validation
@@ -24,5 +29,6 @@ This is a Next.js 16 app using the App Router (`app/` directory), React 19, Type
 ## Environment Setup
 
 Copy `.env.example` to `.env.local` before running:
+
 - `BETTER_AUTH_SECRET` — must be 32+ characters
 - `DB_PATH` — path to SQLite database file (e.g., `data/app.db`)
