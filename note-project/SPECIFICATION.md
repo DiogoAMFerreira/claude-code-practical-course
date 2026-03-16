@@ -16,12 +16,14 @@ A web application where authenticated users can create, view, edit, delete, and 
   - Horizontal rules
 - Public sharing of notes via a public URL (toggle on/off)
 
-### Tech
+### Tech Stack
 
 - Next.js (App Router) + Bun runtime
 - TypeScript
 - TailwindCSS
 - SQLite via Bun's SQLite client with raw SQL
+
+---
 
 ## 2. Architecture
 
@@ -51,6 +53,8 @@ A web application where authenticated users can create, view, edit, delete, and 
 
 - Raw SQL queries executed via Bun's SQLite client
 - A small helper module for DB access
+
+---
 
 ## 3. Functional Requirements
 
@@ -112,6 +116,8 @@ Users can toggle note "public sharing":
 - Shows title and content in read-only mode
 - No editing or owner information necessary
 
+---
+
 ## 4. Non-Functional Requirements
 
 **Performance**
@@ -136,136 +142,170 @@ Users can toggle note "public sharing":
 
 - Simple, minimal UI with keyboard-friendly editor
 
+---
+
 ## 5. Data Model & Database Schema (SQLite)
 
 ### 5.1 Tables
 
 #### better-auth Core Tables
 
-better-auth manages its own tables for authentication. The following tables are required by better-auth:
+better-auth manages its own tables for authentication. These tables must exist before the app runs.
 
-**user**
+You can generate or migrate them automatically using the better-auth CLI:
+
+```bash
+npx auth@latest generate   # generate SQL or ORM schema
+npx auth@latest migrate    # apply missing tables/columns to the database
+```
+
+> **Note:** Column names use camelCase to match better-auth's internal field naming. In SQLite, `boolean` fields are stored as `INTEGER` (0 = false, 1 = true), and `Date` fields are stored as `TEXT`.
+
+---
+
+##### `user`
+
+| Field           | Type    | Required | Description                                     |
+| --------------- | ------- | -------- | ----------------------------------------------- |
+| `id`            | TEXT    | Yes      | Unique identifier for each user (primary key)   |
+| `name`          | TEXT    | Yes      | User's chosen display name                      |
+| `email`         | TEXT    | Yes      | User's email address (unique)                   |
+| `emailVerified` | INTEGER | Yes      | Whether the user's email is verified (0 or 1)   |
+| `image`         | TEXT    | No       | User's profile image URL                        |
+| `createdAt`     | TEXT    | Yes      | Timestamp of when the user account was created  |
+| `updatedAt`     | TEXT    | Yes      | Timestamp of the last update to the user record |
 
 ```sql
 CREATE TABLE user (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
+  id            TEXT    PRIMARY KEY,
+  name          TEXT    NOT NULL,
+  email         TEXT    NOT NULL UNIQUE,
   emailVerified INTEGER NOT NULL DEFAULT 0,
-  image TEXT,
-  createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-  updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+  image         TEXT,
+  createdAt     TEXT    NOT NULL DEFAULT (datetime('now')),
+  updatedAt     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 ```
 
-| Field         | Type    | Description                                            |
-| ------------- | ------- | ------------------------------------------------------ |
-| id            | TEXT    | Unique identifier for each user (primary key)          |
-| name          | TEXT    | User's chosen display name                             |
-| email         | TEXT    | User's email address for communication and login       |
-| emailVerified | INTEGER | Whether the user's email is verified (0 or 1)          |
-| image         | TEXT    | User's image URL (optional)                            |
-| createdAt     | TEXT    | Timestamp of when the user account was created         |
-| updatedAt     | TEXT    | Timestamp of the last update to the user's information |
+---
 
-**session**
+##### `session`
+
+| Field       | Type | Required | Description                                         |
+| ----------- | ---- | -------- | --------------------------------------------------- |
+| `id`        | TEXT | Yes      | Unique identifier for each session (primary key)    |
+| `userId`    | TEXT | Yes      | The ID of the user (foreign key → `user.id`)        |
+| `token`     | TEXT | Yes      | The unique session token                            |
+| `expiresAt` | TEXT | Yes      | The time when the session expires                   |
+| `ipAddress` | TEXT | No       | IP address of the device used to create the session |
+| `userAgent` | TEXT | No       | User agent string of the device                     |
+| `createdAt` | TEXT | Yes      | Timestamp of when the session was created           |
+| `updatedAt` | TEXT | Yes      | Timestamp of when the session was last updated      |
 
 ```sql
 CREATE TABLE session (
-  id TEXT PRIMARY KEY,
-  userId TEXT NOT NULL,
-  token TEXT NOT NULL UNIQUE,
-  expiresAt TEXT NOT NULL,
-  ipAddress TEXT,
-  userAgent TEXT,
-  createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-  updatedAt TEXT NOT NULL DEFAULT (datetime('now')),
+  id          TEXT PRIMARY KEY,
+  userId      TEXT NOT NULL,
+  token       TEXT NOT NULL UNIQUE,
+  expiresAt   TEXT NOT NULL,
+  ipAddress   TEXT,
+  userAgent   TEXT,
+  createdAt   TEXT NOT NULL DEFAULT (datetime('now')),
+  updatedAt   TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (userId) REFERENCES user(id)
 );
 ```
 
-| Field     | Type | Description                                         |
-| --------- | ---- | --------------------------------------------------- |
-| id        | TEXT | Unique identifier for each session (primary key)    |
-| userId    | TEXT | The ID of the user (foreign key)                    |
-| token     | TEXT | The unique session token                            |
-| expiresAt | TEXT | The time when the session expires                   |
-| ipAddress | TEXT | The IP address of the device (optional)             |
-| userAgent | TEXT | The user agent information of the device (optional) |
-| createdAt | TEXT | Timestamp of when the session was created           |
-| updatedAt | TEXT | Timestamp of when the session was updated           |
+---
 
-**account**
+##### `account`
+
+| Field                   | Type | Required | Description                                                                        |
+| ----------------------- | ---- | -------- | ---------------------------------------------------------------------------------- |
+| `id`                    | TEXT | Yes      | Unique identifier for each account (primary key)                                   |
+| `userId`                | TEXT | Yes      | The ID of the user (foreign key → `user.id`)                                       |
+| `accountId`             | TEXT | Yes      | The ID of the account as provided by the SSO provider, or equal to `userId` for credential accounts |
+| `providerId`            | TEXT | Yes      | The ID of the provider (e.g., `"credential"`, `"google"`, `"github"`)              |
+| `accessToken`           | TEXT | No       | The access token returned by the provider                                          |
+| `refreshToken`          | TEXT | No       | The refresh token returned by the provider                                         |
+| `accessTokenExpiresAt`  | TEXT | No       | The time when the access token expires                                             |
+| `refreshTokenExpiresAt` | TEXT | No       | The time when the refresh token expires                                            |
+| `scope`                 | TEXT | No       | The scope of the account returned by the provider                                  |
+| `idToken`               | TEXT | No       | The ID token returned from the provider                                            |
+| `password`              | TEXT | No       | Hashed password — used for email/password authentication                           |
+| `createdAt`             | TEXT | Yes      | Timestamp of when the account was created                                          |
+| `updatedAt`             | TEXT | Yes      | Timestamp of when the account was last updated                                     |
 
 ```sql
 CREATE TABLE account (
-  id TEXT PRIMARY KEY,
-  userId TEXT NOT NULL,
-  accountId TEXT NOT NULL,
-  providerId TEXT NOT NULL,
-  accessToken TEXT,
-  refreshToken TEXT,
-  accessTokenExpiresAt TEXT,
+  id                    TEXT PRIMARY KEY,
+  userId                TEXT NOT NULL,
+  accountId             TEXT NOT NULL,
+  providerId            TEXT NOT NULL,
+  accessToken           TEXT,
+  refreshToken          TEXT,
+  accessTokenExpiresAt  TEXT,
   refreshTokenExpiresAt TEXT,
-  scope TEXT,
-  idToken TEXT,
-  password TEXT,
-  createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-  updatedAt TEXT NOT NULL DEFAULT (datetime('now')),
+  scope                 TEXT,
+  idToken               TEXT,
+  password              TEXT,
+  createdAt             TEXT NOT NULL DEFAULT (datetime('now')),
+  updatedAt             TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (userId) REFERENCES user(id)
 );
 ```
 
-| Field                 | Type | Description                                                                         |
-| --------------------- | ---- | ----------------------------------------------------------------------------------- |
-| id                    | TEXT | Unique identifier for each account (primary key)                                    |
-| userId                | TEXT | The ID of the user (foreign key)                                                    |
-| accountId             | TEXT | The ID of the account as provided by SSO or equal to userId for credential accounts |
-| providerId            | TEXT | The ID of the provider (e.g., "credential", "google", "github")                     |
-| accessToken           | TEXT | The access token returned by the provider (optional)                                |
-| refreshToken          | TEXT | The refresh token returned by the provider (optional)                               |
-| accessTokenExpiresAt  | TEXT | The time when the access token expires (optional)                                   |
-| refreshTokenExpiresAt | TEXT | The time when the refresh token expires (optional)                                  |
-| scope                 | TEXT | The scope of the account returned by the provider (optional)                        |
-| idToken               | TEXT | The ID token returned from the provider (optional)                                  |
-| password              | TEXT | The hashed password for email/password authentication (optional)                    |
-| createdAt             | TEXT | Timestamp of when the account was created                                           |
-| updatedAt             | TEXT | Timestamp of when the account was updated                                           |
+---
 
-**verification**
+##### `verification`
+
+| Field        | Type | Required | Description                                            |
+| ------------ | ---- | -------- | ------------------------------------------------------ |
+| `id`         | TEXT | Yes      | Unique identifier for each verification (primary key)  |
+| `identifier` | TEXT | Yes      | The identifier for the verification request            |
+| `value`      | TEXT | Yes      | The value to be verified                               |
+| `expiresAt`  | TEXT | Yes      | The time when the verification request expires         |
+| `createdAt`  | TEXT | Yes      | Timestamp of when the verification request was created |
+| `updatedAt`  | TEXT | Yes      | Timestamp of when the verification request was updated |
 
 ```sql
 CREATE TABLE verification (
-  id TEXT PRIMARY KEY,
+  id         TEXT PRIMARY KEY,
   identifier TEXT NOT NULL,
-  value TEXT NOT NULL,
-  expiresAt TEXT NOT NULL,
-  createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-  updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+  value      TEXT NOT NULL,
+  expiresAt  TEXT NOT NULL,
+  createdAt  TEXT NOT NULL DEFAULT (datetime('now')),
+  updatedAt  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 ```
 
-| Field      | Type | Description                                            |
-| ---------- | ---- | ------------------------------------------------------ |
-| id         | TEXT | Unique identifier for each verification (primary key)  |
-| identifier | TEXT | The identifier for the verification request            |
-| value      | TEXT | The value to be verified                               |
-| expiresAt  | TEXT | The time when the verification request expires         |
-| createdAt  | TEXT | Timestamp of when the verification request was created |
-| updatedAt  | TEXT | Timestamp of when the verification request was updated |
+---
 
-#### notes
+#### `notes`
+
+Application-managed table for user notes.
+
+| Field          | Type    | Required | Description                                          |
+| -------------- | ------- | -------- | ---------------------------------------------------- |
+| `id`           | TEXT    | Yes      | Unique identifier for the note (primary key)         |
+| `user_id`      | TEXT    | Yes      | Owner of the note (foreign key → `user.id`)          |
+| `title`        | TEXT    | Yes      | Note title                                           |
+| `content_json` | TEXT    | Yes      | Stringified TipTap JSON document                     |
+| `is_public`    | INTEGER | Yes      | Whether the note is publicly shared (0 or 1)         |
+| `public_slug`  | TEXT    | No       | Unique slug for public URL access (unique per note)  |
+| `created_at`   | TEXT    | Yes      | Timestamp of when the note was created               |
+| `updated_at`   | TEXT    | Yes      | Timestamp of the last update to the note             |
 
 ```sql
 CREATE TABLE notes (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  title TEXT NOT NULL,
-  content_json TEXT NOT NULL,
-  is_public INTEGER NOT NULL DEFAULT 0,
-  public_slug TEXT UNIQUE,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  id           TEXT    PRIMARY KEY,
+  user_id      TEXT    NOT NULL,
+  title        TEXT    NOT NULL,
+  content_json TEXT    NOT NULL,
+  is_public    INTEGER NOT NULL DEFAULT 0,
+  public_slug  TEXT    UNIQUE,
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES user(id)
 );
 ```
@@ -273,10 +313,12 @@ CREATE TABLE notes (
 ### 5.2 Indexes
 
 ```sql
-CREATE INDEX idx_notes_user_id ON notes(user_id);
+CREATE INDEX idx_notes_user_id    ON notes(user_id);
 CREATE INDEX idx_notes_public_slug ON notes(public_slug);
-CREATE INDEX idx_notes_is_public ON notes(is_public);
+CREATE INDEX idx_notes_is_public  ON notes(is_public);
 ```
+
+---
 
 ## 6. Backend: DB & API Layer
 
@@ -323,6 +365,8 @@ export type Note = {
 
 Each function enforces `user_id = ?` in SQL where applicable, to avoid cross-user access.
 
+---
+
 ## 7. API Design (Next.js Route Handlers)
 
 Base path under `/api/notes`.
@@ -338,7 +382,7 @@ All `/api/notes` handlers (except public read) must:
 
 ### 7.2 Endpoints
 
-#### GET /api/notes
+#### `GET /api/notes`
 
 **Description:** List notes for current user.
 
@@ -355,9 +399,11 @@ All `/api/notes` handlers (except public read) must:
 ]
 ```
 
-Optionally omit `contentJson` for list for performance.
+Optionally omit `contentJson` from the list response for performance.
 
-#### POST /api/notes
+---
+
+#### `POST /api/notes`
 
 **Description:** Create a new note.
 
@@ -366,27 +412,31 @@ Optionally omit `contentJson` for list for performance.
 ```json
 {
   "title": "Optional title",
-  "contentJson": { "type": "doc", ... }
+  "contentJson": { "type": "doc" }
 }
 ```
 
 **Behavior:**
 
-- Default title = "Untitled note" if missing
+- Default title = `"Untitled note"` if missing
 - Default `contentJson` = empty TipTap document if missing
 
-**Response 201:** created Note (or minimal subset)
+**Response 201:** Created Note (or minimal subset)
 
-#### GET /api/notes/:id
+---
+
+#### `GET /api/notes/:id`
 
 **Description:** Get single note owned by current user.
 
 **Response:**
 
-- 200 with full note including `contentJson`
-- 404 if not found or not owned by user
+- `200` with full note including `contentJson`
+- `404` if not found or not owned by user
 
-#### PUT /api/notes/:id
+---
+
+#### `PUT /api/notes/:id`
 
 **Description:** Update note title/content.
 
@@ -395,25 +445,29 @@ Optionally omit `contentJson` for list for performance.
 ```json
 {
   "title": "New title",
-  "contentJson": { ... }
+  "contentJson": {}
 }
 ```
 
 **Response:**
 
-- 200 with updated note
-- 404 if not found
+- `200` with updated note
+- `404` if not found
 
-#### DELETE /api/notes/:id
+---
+
+#### `DELETE /api/notes/:id`
 
 **Description:** Delete note.
 
 **Response:**
 
-- 204 on success
-- 404 if not found
+- `204` on success
+- `404` if not found
 
-#### POST /api/notes/:id/share
+---
+
+#### `POST /api/notes/:id/share`
 
 **Description:** Toggle public sharing.
 
@@ -442,7 +496,7 @@ Optionally omit `contentJson` for list for performance.
 
 ### 7.3 Public Note Endpoint
 
-#### GET /api/public-notes/:slug
+#### `GET /api/public-notes/:slug`
 
 **Description:** Read-only access to public notes.
 
@@ -451,64 +505,61 @@ Optionally omit `contentJson` for list for performance.
 ```json
 {
   "title": "Public note",
-  "contentJson": { ... }
+  "contentJson": {}
 }
 ```
 
-- 404 if slug not found or `is_public = 0`
+- `404` if slug not found or `is_public = 0`
 
-(Or skip this API and just resolve directly in the `/p/[slug]` route using server components.)
+> Alternatively, skip this API endpoint and resolve directly in the `/p/[slug]` route using server components.
+
+---
 
 ## 8. Frontend – Pages & Components
 
 ### 8.1 Routes
 
-Assuming Next.js App Router structure:
+Next.js App Router structure:
 
-- `/` – Landing page
-  - Marketing / "Log in / Sign up" CTA
-- `/dashboard` – Authenticated area
-  - List of user notes
-  - "Create note" button
-- `/notes/[id]` – Authenticated note editor page
-  - TipTap editor
-  - Title field
-  - Share toggle
-  - Delete button
-- `/p/[slug]` – Public note page
-  - Read-only content
-  - No nav to user-specific area if viewer is unauthenticated
+| Route           | Description                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| `/`             | Landing page — marketing copy with "Log in / Sign up" CTA               |
+| `/dashboard`    | Authenticated area — list of user notes + "Create note" button           |
+| `/notes/[id]`   | Note editor page — TipTap editor, title field, share toggle, delete button |
+| `/p/[slug]`     | Public note page — read-only content, no user-specific navigation        |
 
 ### 8.2 Layout & Navigation
 
 - Global layout: `app/layout.tsx`
-  - Header with app name, login/logout/account & theme
-- `app/(auth)/login`, `app/(auth)/register` (if better-auth doesn't provide their own UI)
+  - Header with app name, login/logout/account & theme toggle
+- `app/(auth)/login`, `app/(auth)/register` — auth pages (if better-auth doesn't provide its own UI)
 
 ### 8.3 Components
 
-**components/NoteList.tsx**
+**`components/NoteList.tsx`**
 
 - Props: `notes: { id, title, updatedAt, isPublic }[]`
 - Renders list with links to `/notes/[id]`
 
-**components/NoteEditor.tsx**
+**`components/NoteEditor.tsx`**
 
 - TipTap-based editor
 - Controlled by parent (`onChange` updates state, eventual API call)
 
-**components/ShareToggle.tsx**
+**`components/ShareToggle.tsx`**
 
 - Switch/checkbox for `isPublic`
 - Shows public URL when enabled
 
-**components/DeleteNoteButton.tsx**
+**`components/DeleteNoteButton.tsx`**
 
 - Confirms and calls DELETE API
 
-**components/PublicNoteViewer.tsx**
+**`components/PublicNoteViewer.tsx`**
 
-- Render TipTap content in read-only mode (or use `EditorContent` with `editable: false`)
+- Renders TipTap content in read-only mode (use `EditorContent` with `editable: false`)
+
+---
 
 ## 9. TipTap Integration
 
@@ -516,9 +567,9 @@ Assuming Next.js App Router structure:
 
 Enable at minimum:
 
-- `StarterKit` (with paragraphs, headings, bold, italic, bullet lists, horizontal rule, etc.)
+- `StarterKit` (paragraphs, headings, bold, italic, bullet lists, horizontal rule, etc.)
 - `Code` (inline code)
-- `CodeBlockLowlight` or `CodeBlock` (for code snippets)
+- `CodeBlockLowlight` or `CodeBlock` (code snippets)
 
 **Example editor config:**
 
@@ -544,7 +595,7 @@ const editor = useEditor({
 });
 ```
 
-Content is always stored in DB as `JSON.stringify(json)`; when loading, `JSON.parse` and pass as `content`.
+Content is always stored in the DB as `JSON.stringify(json)`; when loading, `JSON.parse` and pass as `content`.
 
 ### 9.2 Toolbar
 
@@ -557,7 +608,9 @@ Buttons:
 - Code block
 - Horizontal rule
 
-Each button calls the relevant TipTap chain: `editor.chain().focus().toggleBold().run()` etc.
+Each button calls the relevant TipTap chain, e.g. `editor.chain().focus().toggleBold().run()`.
+
+---
 
 ## 10. Styling (TailwindCSS)
 
@@ -565,7 +618,9 @@ Each button calls the relevant TipTap chain: `editor.chain().focus().toggleBold(
 - Use a minimal design:
   - Neutral background, card-like note container
   - Utility classes on components
-- Consider a prose style for read-only content (using `@tailwindcss/typography`)
+- Consider `@tailwindcss/typography` for prose-style rendering of read-only note content
+
+---
 
 ## 11. Security Considerations
 
@@ -580,23 +635,25 @@ Each button calls the relevant TipTap chain: `editor.chain().focus().toggleBold(
 
 **Public notes**
 
-- Slug should be sufficiently random to prevent guessing (e.g. 16+ chars)
+- Slug should be sufficiently random to prevent guessing (16+ chars recommended)
 
 **XSS**
 
 - Primary data is TipTap JSON, not raw HTML
-- When rendering to HTML, only use TipTap's rendering (no arbitrary `dangerouslySetInnerHTML` with unsanitized data)
+- When rendering to HTML, only use TipTap's rendering — no arbitrary `dangerouslySetInnerHTML` with unsanitized data
 
 **Rate limiting (optional enhancement)**
 
 - Apply per-IP or per-user rate limiting to API routes if exposed publicly
+
+---
 
 ## 12. Development Workflow
 
 1. Initialize Next.js app with Bun & TypeScript
 2. Set up TailwindCSS
 3. Integrate better-auth and session handling
-4. Implement SQLite DB initialization and migrations (e.g. via a `scripts/init-db.ts` or manual `.sql`)
+4. Initialize SQLite schema — run `npx auth@latest migrate` for auth tables, and apply `notes` table manually or via a `scripts/init-db.ts`
 5. Build DB helpers and note repository
 6. Implement `/api/notes` and sharing APIs
 7. Build dashboard and note editor pages
