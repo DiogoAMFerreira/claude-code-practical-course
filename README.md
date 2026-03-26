@@ -198,3 +198,22 @@ AI agents like Claude Code can use many tools - some built-in (like the "bash" t
 If you know that a certain tool or feature should be used for a (part of a) task - explicitly tell the AI to do so. Don't hope it automatically uses the right tool or feature just because it theoretically could.
 
 ---
+
+## Using MCP Servers
+
+MCP or Model Context Protocol is a standard to connect AI applications to external systems. There's a big list of MCP Servers that you can give to Claude Code to have access to more information.
+
+More information about what MCP's are here: https://modelcontextprotocol.io/docs/getting-started/intro
+List of available MCP Servers for Claude here: https://platform.claude.com/docs/en/agents-and-tools/remote-mcp-servers
+
+One specific MCP Server that is usually very usefull is the context7 MCP server. This MCP server gives claude code easier access to documentation on libraries. This makes easier for Claude Code to actually respect the rules of a library and not require the user to give the context manually
+
+Here's the link to the MCP server page: https://context7.com/docs/overview
+The link to it's server: https://mcp.context7.com/mcp
+And the link to it's Github: https://github.com/upstash/context7#installation
+
+Or maybe this command still works:
+
+```sh
+claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp
+```

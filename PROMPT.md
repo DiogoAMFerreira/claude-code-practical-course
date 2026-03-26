@@ -39,7 +39,9 @@ We're using the better-auth library which expects a certain database structure.
 
 Here's the official better-auth database documentation article:
 
-<better-auth-database-docs>
+<details>
+
+<summary>better-auth database documentation</summary>
 
 ---
 
@@ -1069,4 +1071,28 @@ It's very important to read the documentation regarding experimental joins for y
 - [MSSQL](/docs/adapters/mssql#joins-experimental)
 - [MongoDB](/docs/adapters/mongo#joins-experimental)
 
-</better-auth-database-docs>
+</details>
+
+# Plan mode for specification start prompt
+
+Let's start building the application described in @SPECIFICATION.md
+
+Start by setting up the core route structure. Only add a dummy message to each page. No actual page content yet.
+
+Just create all those diferent page.tsx files for the different application routes. Don't implement authentication yet.
+
+# Autentication and database access
+
+Implement authentication and database access.
+
+Add a "lib" folder with "auth.ts" and "db.ts" files. Export a db handle in the db.ts file and make sure WAL mode is used and all required database tables are created if they don't exist yet
+
+Use web search or the context7 mcp to find the relevant documentation for Bun SQLLite and better-auth setup with next.js and Bun
+
+# Verify the implementation (Subagents)
+
+We're building @SPECIFICATION.md
+
+Please evaluate the existing codebase to check whether authentication and database access are implemented correctly (in line with the explanations in @SPECIFICATION.md and the official documentation for the libraries / technologies used).
+
+Use web search or the context7 mcp to look up docs.
