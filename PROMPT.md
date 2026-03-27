@@ -1104,3 +1104,10 @@ Use web search or the context7 mcp to look up docs.
 We're building @SPEC.md
 
 Please evaluate the existing codebase to check whether authentication and database access are implemented correctly (in line with the explanations in @SPEC.md and the official documentation for the libraries / technologies used).
+
+# Using the Skills to continue development
+
+Let's add a proper authentication route / page content to this app. We only support email + password auth.
+Users can switch between modes, implemented via search params.
+
+No password resetting for this demo app.

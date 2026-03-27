@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite";
+import Database from "better-sqlite3";
 
 const db = new Database(process.env.DB_PATH ?? "data/app.db");
 
@@ -75,13 +75,13 @@ db.exec(`
 export { db };
 
 export function query<T>(sql: string, params: unknown[] = []): T[] {
-  return db.query(sql).all(...params) as T[];
+  return db.prepare(sql).all(...params) as T[];
 }
 
 export function get<T>(sql: string, params: unknown[] = []): T | undefined {
-  return db.query(sql).get(...params) as T | undefined;
+  return db.prepare(sql).get(...params) as T | undefined;
 }
 
 export function run(sql: string, params: unknown[] = []): void {
-  db.query(sql).run(...params);
+  db.prepare(sql).run(...params);
 }

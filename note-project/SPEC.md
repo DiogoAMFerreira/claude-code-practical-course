@@ -18,10 +18,10 @@ A web application where authenticated users can create, view, edit, delete, and 
 
 ### Tech Stack
 
-- Next.js (App Router) + Bun runtime
+- Next.js (App Router) + Node.js runtime
 - TypeScript
 - TailwindCSS
-- SQLite via Bun's SQLite client with raw SQL
+- SQLite via `better-sqlite3` with raw SQL
 
 ---
 
@@ -33,8 +33,8 @@ A web application where authenticated users can create, view, edit, delete, and 
   - Server components for data fetching
   - Client components for TipTap editor and interactive UI
   - Route Handlers (`app/api/.../route.ts`) for JSON APIs
-- **Runtime:** Bun (for dev & production)
-- **Database:** Single SQLite file (e.g., `data/app.db`) accessed via Bun's SQLite client
+- **Runtime:** Node.js (for dev & production)
+- **Database:** Single SQLite file (e.g., `data/app.db`) accessed via `better-sqlite3`
 - **Auth:** better-auth integrated into Next.js (middleware + server helpers)
 
 ### 2.2 Application Layers
@@ -51,7 +51,7 @@ A web application where authenticated users can create, view, edit, delete, and 
 
 **Data access layer**
 
-- Raw SQL queries executed via Bun's SQLite client
+- Raw SQL queries executed via `better-sqlite3`
 - A small helper module for DB access
 
 ---
@@ -326,7 +326,7 @@ CREATE INDEX idx_notes_is_public  ON notes(is_public);
 
 **File:** `lib/db.ts`
 
-- Initialize Bun SQLite client with DB file (`app.db`)
+- Initialize `better-sqlite3` client with DB file (`app.db`)
 - Export helper functions such as:
   - `getDb()` – returns singleton DB connection
   - Utility wrappers for:
