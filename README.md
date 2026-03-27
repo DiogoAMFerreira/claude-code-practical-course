@@ -217,3 +217,36 @@ Or maybe this command still works:
 ```sh
 claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp
 ```
+
+## Creating SubAgents
+
+To create your own SubAgent in the .claude folder create a folder that must be named agents.
+Each agent must be a md file with the following header:
+
+```md
+---
+name: MyCoolAgent
+description: Quick description of what the agent should be used for. Use words like specialist
+tools: Tools to use from the list of tools: https://code.claude.com/docs/en/settings#tools-available-to-claude
+model: Model to be used 
+---
+```
+
+The subagent name must match the agent md file name.
+
+## Agent Skills
+
+This is a open standard to multiple supported by other AI's. They are used to define extra, dynamically loaded, context. For example React Components Best Practices
+To setup and use this you will need a SKILL.md file and if necessary there can be extra files and folders for references, scripts or assets
+
+This follow a similar configuration to Agents. But in this case each skill must be a folder inside a skills folder with a name all in lowercase with no spaces.
+Inside this folder you require a SKILL.md file with the following header:
+
+```md
+---
+name: must-match-the-skill-folder-name
+description: Quick description of what the skill should be used for. Use words that the AI can use to search this skill
+---
+```
+
+A complete guide on skills can be found here: https://code.claude.com/docs/en/skills

@@ -30,7 +30,7 @@ Do you need more information to create me a technical specification document whi
 
 ## 1. Clean specification prompt
 
-We're building an app described in @SPECIFICATION.md .
+We're building an app described in @SPEC.md .
 
 Please format this file as proper markdown.
 
@@ -1075,7 +1075,7 @@ It's very important to read the documentation regarding experimental joins for y
 
 # Plan mode for specification start prompt
 
-Let's start building the application described in @SPECIFICATION.md
+Let's start building the application described in @SPEC.md
 
 Start by setting up the core route structure. Only add a dummy message to each page. No actual page content yet.
 
@@ -1091,8 +1091,16 @@ Use web search or the context7 mcp to find the relevant documentation for Bun SQ
 
 # Verify the implementation (Subagents)
 
-We're building @SPECIFICATION.md
+## Prompt without SubAgent
 
-Please evaluate the existing codebase to check whether authentication and database access are implemented correctly (in line with the explanations in @SPECIFICATION.md and the official documentation for the libraries / technologies used).
+We're building @SPEC.md
+
+Please evaluate the existing codebase to check whether authentication and database access are implemented correctly (in line with the explanations in @SPEC.md and the official documentation for the libraries / technologies used).
 
 Use web search or the context7 mcp to look up docs.
+
+## Prompt with SubAgent
+
+We're building @SPEC.md
+
+Please evaluate the existing codebase to check whether authentication and database access are implemented correctly (in line with the explanations in @SPEC.md and the official documentation for the libraries / technologies used).
