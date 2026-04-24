@@ -24,7 +24,11 @@ export default async function EditNotePage({ params }: EditNotePageProps) {
         <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 mb-8">
           Edit Note
         </h1>
-        <EditNoteForm noteId={note.id} initialTitle={note.title} initialContentJson={note.contentJson} />
+        <EditNoteForm
+          noteId={note.id}
+          initialTitle={note.title}
+          initialContentJson={note.contentJson}
+        />
       </main>
     </>
   );

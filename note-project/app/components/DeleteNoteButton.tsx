@@ -37,9 +37,7 @@ export default function DeleteNoteButton({ noteId, noteTitle }: DeleteNoteButton
         ref={dialogRef}
         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 p-6 shadow-xl backdrop:bg-black/50 max-w-sm w-full m-0"
       >
-        <h2 className="text-lg font-semibold mb-2">
-          Delete note?
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Delete note?</h2>
         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6">
           &ldquo;{noteTitle}&rdquo; will be permanently deleted. This cannot be undone.
         </p>

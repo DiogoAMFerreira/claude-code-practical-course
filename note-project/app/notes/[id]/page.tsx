@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/app/components/Header";
 import NoteViewer from "@/app/components/NoteViewer";
 import DeleteNoteButton from "@/app/components/DeleteNoteButton";
+import ShareToggle from "@/app/components/ShareToggle";
 import { getNoteById } from "@/lib/notes";
 
 interface NotePageProps {
@@ -36,6 +37,13 @@ export default async function NotePage({ params }: NotePageProps) {
             </Link>
             <DeleteNoteButton noteId={note.id} noteTitle={note.title} />
           </div>
+        </div>
+        <div className="mb-6 pb-6 border-b border-neutral-200 dark:border-neutral-700">
+          <ShareToggle
+            noteId={note.id}
+            initialIsPublic={note.isPublic}
+            initialSlug={note.publicSlug}
+          />
         </div>
         <NoteViewer contentJson={note.contentJson} />
       </main>

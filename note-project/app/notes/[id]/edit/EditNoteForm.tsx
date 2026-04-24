@@ -13,7 +13,11 @@ interface EditNoteFormProps {
   initialContentJson: string;
 }
 
-export default function EditNoteForm({ noteId, initialTitle, initialContentJson }: EditNoteFormProps) {
+export default function EditNoteForm({
+  noteId,
+  initialTitle,
+  initialContentJson,
+}: EditNoteFormProps) {
   const [title, setTitle] = useState(initialTitle);
   const [error, setError] = useState("");
 

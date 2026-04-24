@@ -220,21 +220,21 @@ CREATE TABLE session (
 
 ##### `account`
 
-| Field                   | Type | Required | Description                                                                        |
-| ----------------------- | ---- | -------- | ---------------------------------------------------------------------------------- |
-| `id`                    | TEXT | Yes      | Unique identifier for each account (primary key)                                   |
-| `userId`                | TEXT | Yes      | The ID of the user (foreign key → `user.id`)                                       |
+| Field                   | Type | Required | Description                                                                                         |
+| ----------------------- | ---- | -------- | --------------------------------------------------------------------------------------------------- |
+| `id`                    | TEXT | Yes      | Unique identifier for each account (primary key)                                                    |
+| `userId`                | TEXT | Yes      | The ID of the user (foreign key → `user.id`)                                                        |
 | `accountId`             | TEXT | Yes      | The ID of the account as provided by the SSO provider, or equal to `userId` for credential accounts |
-| `providerId`            | TEXT | Yes      | The ID of the provider (e.g., `"credential"`, `"google"`, `"github"`)              |
-| `accessToken`           | TEXT | No       | The access token returned by the provider                                          |
-| `refreshToken`          | TEXT | No       | The refresh token returned by the provider                                         |
-| `accessTokenExpiresAt`  | TEXT | No       | The time when the access token expires                                             |
-| `refreshTokenExpiresAt` | TEXT | No       | The time when the refresh token expires                                            |
-| `scope`                 | TEXT | No       | The scope of the account returned by the provider                                  |
-| `idToken`               | TEXT | No       | The ID token returned from the provider                                            |
-| `password`              | TEXT | No       | Hashed password — used for email/password authentication                           |
-| `createdAt`             | TEXT | Yes      | Timestamp of when the account was created                                          |
-| `updatedAt`             | TEXT | Yes      | Timestamp of when the account was last updated                                     |
+| `providerId`            | TEXT | Yes      | The ID of the provider (e.g., `"credential"`, `"google"`, `"github"`)                               |
+| `accessToken`           | TEXT | No       | The access token returned by the provider                                                           |
+| `refreshToken`          | TEXT | No       | The refresh token returned by the provider                                                          |
+| `accessTokenExpiresAt`  | TEXT | No       | The time when the access token expires                                                              |
+| `refreshTokenExpiresAt` | TEXT | No       | The time when the refresh token expires                                                             |
+| `scope`                 | TEXT | No       | The scope of the account returned by the provider                                                   |
+| `idToken`               | TEXT | No       | The ID token returned from the provider                                                             |
+| `password`              | TEXT | No       | Hashed password — used for email/password authentication                                            |
+| `createdAt`             | TEXT | Yes      | Timestamp of when the account was created                                                           |
+| `updatedAt`             | TEXT | Yes      | Timestamp of when the account was last updated                                                      |
 
 ```sql
 CREATE TABLE account (
@@ -285,16 +285,16 @@ CREATE TABLE verification (
 
 Application-managed table for user notes.
 
-| Field          | Type    | Required | Description                                          |
-| -------------- | ------- | -------- | ---------------------------------------------------- |
-| `id`           | TEXT    | Yes      | Unique identifier for the note (primary key)         |
-| `user_id`      | TEXT    | Yes      | Owner of the note (foreign key → `user.id`)          |
-| `title`        | TEXT    | Yes      | Note title                                           |
-| `content_json` | TEXT    | Yes      | Stringified TipTap JSON document                     |
-| `is_public`    | INTEGER | Yes      | Whether the note is publicly shared (0 or 1)         |
-| `public_slug`  | TEXT    | No       | Unique slug for public URL access (unique per note)  |
-| `created_at`   | TEXT    | Yes      | Timestamp of when the note was created               |
-| `updated_at`   | TEXT    | Yes      | Timestamp of the last update to the note             |
+| Field          | Type    | Required | Description                                         |
+| -------------- | ------- | -------- | --------------------------------------------------- |
+| `id`           | TEXT    | Yes      | Unique identifier for the note (primary key)        |
+| `user_id`      | TEXT    | Yes      | Owner of the note (foreign key → `user.id`)         |
+| `title`        | TEXT    | Yes      | Note title                                          |
+| `content_json` | TEXT    | Yes      | Stringified TipTap JSON document                    |
+| `is_public`    | INTEGER | Yes      | Whether the note is publicly shared (0 or 1)        |
+| `public_slug`  | TEXT    | No       | Unique slug for public URL access (unique per note) |
+| `created_at`   | TEXT    | Yes      | Timestamp of when the note was created              |
+| `updated_at`   | TEXT    | Yes      | Timestamp of the last update to the note            |
 
 ```sql
 CREATE TABLE notes (
@@ -521,12 +521,12 @@ Optionally omit `contentJson` from the list response for performance.
 
 Next.js App Router structure:
 
-| Route           | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| `/`             | Landing page — marketing copy with "Log in / Sign up" CTA               |
-| `/dashboard`    | Authenticated area — list of user notes + "Create note" button           |
-| `/notes/[id]`   | Note editor page — TipTap editor, title field, share toggle, delete button |
-| `/p/[slug]`     | Public note page — read-only content, no user-specific navigation        |
+| Route         | Description                                                                |
+| ------------- | -------------------------------------------------------------------------- |
+| `/`           | Landing page — marketing copy with "Log in / Sign up" CTA                  |
+| `/dashboard`  | Authenticated area — list of user notes + "Create note" button             |
+| `/notes/[id]` | Note editor page — TipTap editor, title field, share toggle, delete button |
+| `/p/[slug]`   | Public note page — read-only content, no user-specific navigation          |
 
 ### 8.2 Layout & Navigation
 

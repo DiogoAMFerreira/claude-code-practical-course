@@ -36,25 +36,18 @@ function rowToNote(row: NoteRow): Note {
 }
 
 export function getNotesByUser(userId: string): Note[] {
-  const rows = query<NoteRow>(
-    "SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC",
-    [userId]
-  );
+  const rows = query<NoteRow>("SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC", [
+    userId,
+  ]);
   return rows.map(rowToNote);
 }
 
 export function getNoteById(userId: string, noteId: string): Note | null {
-  const row = get<NoteRow>(
-    "SELECT * FROM notes WHERE id = ? AND user_id = ?",
-    [noteId, userId]
-  );
+  const row = get<NoteRow>("SELECT * FROM notes WHERE id = ? AND user_id = ?", [noteId, userId]);
   return row ? rowToNote(row) : null;
 }
 
 export function getNoteByPublicSlug(slug: string): Note | null {
-  const row = get<NoteRow>(
-    "SELECT * FROM notes WHERE public_slug = ? AND is_public = 1",
-    [slug]
-  );
+  const row = get<NoteRow>("SELECT * FROM notes WHERE public_slug = ? AND is_public = 1", [slug]);
   return row ? rowToNote(row) : null;
 }

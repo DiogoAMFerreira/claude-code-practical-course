@@ -12,7 +12,9 @@ export default async function NewNotePage() {
     <>
       <Header />
       <main className="max-w-3xl mx-auto px-6 py-10">
-        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 mb-6">New Note</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 mb-6">
+          New Note
+        </h1>
         <NewNoteForm />
       </main>
     </>

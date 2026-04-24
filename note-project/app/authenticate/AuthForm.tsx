@@ -43,9 +43,7 @@ export default function AuthForm({ isSignUp }: AuthFormProps) {
             {isSignUp ? "Create an account" : "Welcome back"}
           </h1>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            {isSignUp
-              ? "Sign up to start taking notes."
-              : "Sign in to your account."}
+            {isSignUp ? "Sign up to start taking notes." : "Sign in to your account."}
           </p>
         </header>
 
@@ -136,20 +134,14 @@ export default function AuthForm({ isSignUp }: AuthFormProps) {
           {isSignUp ? (
             <>
               Already have an account?{" "}
-              <Link
-                href="?mode=signin"
-                className="font-medium text-blue-600 hover:underline"
-              >
+              <Link href="?mode=signin" className="font-medium text-blue-600 hover:underline">
                 Sign in
               </Link>
             </>
           ) : (
             <>
               Don&apos;t have an account?{" "}
-              <Link
-                href="?mode=signup"
-                className="font-medium text-blue-600 hover:underline"
-              >
+              <Link href="?mode=signup" className="font-medium text-blue-600 hover:underline">
                 Sign up
               </Link>
             </>

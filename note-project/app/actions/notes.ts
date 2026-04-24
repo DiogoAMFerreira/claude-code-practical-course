@@ -77,10 +77,10 @@ export async function updateNote(
     return { error: "Invalid note content shape" };
   }
 
-  const existing = get<{ id: string }>(
-    "SELECT id FROM notes WHERE id = ? AND user_id = ?",
-    [noteId, session.user.id]
-  );
+  const existing = get<{ id: string }>("SELECT id FROM notes WHERE id = ? AND user_id = ?", [
+    noteId,
+    session.user.id,
+  ]);
   if (!existing) return { error: "Note not found" };
 
   try {
@@ -95,14 +95,53 @@ export async function updateNote(
   redirect(`/notes/${noteId}`);
 }
 
+export async function toggleNoteSharing(
+  noteId: string,
+  isPublic: boolean
+): Promise<{ error: string } | { isPublic: boolean; publicSlug: string | null }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/authenticate");
+
+  const existing = get<{ id: string; public_slug: string | null }>(
+    "SELECT id, public_slug FROM notes WHERE id = ? AND user_id = ?",
+    [noteId, session.user.id]
+  );
+  if (!existing) return { error: "Note not found" };
+
+  const now = new Date().toISOString();
+
+  if (isPublic) {
+    const slug = existing.public_slug ?? crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    try {
+      run(
+        "UPDATE notes SET is_public = 1, public_slug = ?, updated_at = ? WHERE id = ? AND user_id = ?",
+        [slug, now, noteId, session.user.id]
+      );
+    } catch {
+      return { error: "Failed to update sharing" };
+    }
+    return { isPublic: true, publicSlug: slug };
+  } else {
+    try {
+      run(
+        "UPDATE notes SET is_public = 0, public_slug = NULL, updated_at = ? WHERE id = ? AND user_id = ?",
+        [now, noteId, session.user.id]
+      );
+    } catch {
+      return { error: "Failed to update sharing" };
+    }
+    return { isPublic: false, publicSlug: null };
+  }
+}
+
 export async function deleteNote(noteId: string): Promise<{ error: string } | void> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/authenticate");
 
-  const existing = get<{ id: string }>(
-    "SELECT id FROM notes WHERE id = ? AND user_id = ?",
-    [noteId, session.user.id]
-  );
+  const existing = get<{ id: string }>("SELECT id FROM notes WHERE id = ? AND user_id = ?", [
+    noteId,
+    session.user.id,
+  ]);
   if (!existing) return { error: "Note not found" };
 
   try {

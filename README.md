@@ -7,6 +7,32 @@ https://www.udemy.com/course/claude-code-the-practical-guide/
 
 Attached to this project there's also a simplified cheat sheet
 
+# Table of Contents
+
+- [Claude installation](#claude-installation)
+- [Claude Code in Different Terminals](#claude-code-in-different-terminals)
+- [Choosing AI Models](#choosing-ai-models)
+- [When To Start New Sessions & Making Sense Of Compaction](#when-to-start-new-sessions--making-sense-of-compaction)
+- [Quickly run Claude prompts](#quickly-run-claude-prompts)
+- [Resume to an old session](#resume-to-an-old-session)
+- [Switch Claude Modes](#switch-claude-modes)
+- [Claude settings](#claude-settings)
+- [Using Claude Code in a Docker Sandbox](#using-claude-code-in-a-docker-sandbox)
+- [Using Claude Code in an alternative Sandbox](#using-claude-code-in-an-alternative-sandbox)
+- [Rewinding your session](#rewinding-your-session)
+- [Re-context](#re-context)
+- [Tips & Tricks](#tips--tricks)
+- [Prompt & Context Engineering Recommendation](#prompt--context-engineering-recommendation)
+- [Using MCP Servers](#using-mcp-servers)
+- [Creating SubAgents](#creating-subagents)
+- [Agent Skills](#agent-skills)
+- [Enhancing Skills](#enhancing-skills)
+- [Adding Third-Party Skills](#adding-third-party-skills)
+- [Creating Commands](#creating-commands)
+- [Hooks](#hooks)
+
+---
+
 # Claude
 
 ## Claude installation
@@ -29,7 +55,7 @@ For example, entering a line break will be different, depending on which termina
 
 Claude Code offers a broad variety of configuration options and slash commands. You'll, of course, see all crucial commands throughout this course.
 
-One command you should be aware of right from the start is the /model command which let's you choose the AI model you want to use.
+One command you should be aware of right from the start is the /model command which lets you choose the AI model you want to use.
 
 Typically, you'll only change this from time to time, if at all. But you should at least initially check that you're working with the AI model you want to use (e.g., "Opus", the most capable AI model offered by Anthropic).
 
@@ -85,7 +111,7 @@ Attention: This will run Claude in the Bypass Permissions mode since it won't af
 
 ## Using Claude Code in an alternative Sandbox
 
-If you don't have docker or don't want to run it in docker for some reason, you can also use it's own sandbox mode with the command:
+If you don't have docker or don't want to run it in docker for some reason, you can also use its own sandbox mode with the command:
 
 ```sh
 /sandbox
@@ -141,13 +167,10 @@ You can disable / enable and configure this "Auto Memory" feature via the /memor
 
 "Auto Memory" therefore isn't a replacement for a customized CLAUDE.MD file, instead you can think of it as an additional help which could lead to better results. If you know about a certain piece of information or about a specific instruction you want Claude Code to follow in all your sessions, you of course shouldn't hope for it to memorize it => Instead put it into CLAUDE.MD yourself!
 
-## Breaking line in your prompt
+## Tips & Tricks
 
-To break line and write multiple lines in your prompt do "\ + Enter"
-
-## Refer to files in your prompt
-
-To refer to a specific file in your prompt use the @ symbol followed by the file or path to file
+- **Multi-line prompt:** press `\ + Enter` to insert a line break without submitting
+- **Reference a file:** use `@path/to/file` in your prompt to include a specific file in context
 
 ## Prompt & Context Engineering Recommendation
 
@@ -193,7 +216,7 @@ So, for example, if you know about a particular pitfall or common mistake, inclu
 
 ## Explicitly Tell The AI About Tools It Should Use
 
-AI agents like Claude Code can use many tools - some built-in (like the "bash" tool, web requests etc.) and some provided via MCP servers (covered later in the course). There also are features like "subagents" or "skills" you can leverage (also covered later).
+AI agents like Claude Code can use many tools - some built-in (like the "bash" tool, web requests etc.) and some provided via MCP servers (covered later in the course). There are also features like "subagents" or "skills" you can leverage (also covered later).
 
 If you know that a certain tool or feature should be used for a (part of a) task - explicitly tell the AI to do so. Don't hope it automatically uses the right tool or feature just because it theoretically could.
 
@@ -212,7 +235,7 @@ Here's the link to the MCP server page: https://context7.com/docs/overview
 The link to it's server: https://mcp.context7.com/mcp
 And the link to it's Github: https://github.com/upstash/context7#installation
 
-Or maybe this command still works:
+Alternatively, install via CLI:
 
 ```sh
 claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp
@@ -273,7 +296,6 @@ For example, you could build a specialized code-review skill like this:
     name: code-review
     description: Review code for bugs, security or performance issues. Use this skill when asked to perform code reviews or after finishing major tasks or after refactoring code.
     allowed-tools: Read
-    description: Perform a code-review
     ---
 
     MODE: $ARGUMENTS
@@ -314,6 +336,154 @@ Of course, you can and should explore those skills you installed. You can tweak 
 
 ## Creating Commands
 
-The same way you can write Skills and Agents. You can create custom Commands. These are nothing more that simple reusable PROMPT's you can have in your project. You can even define with a custom header the allowed tools and a description to the command. That will help when you search for the command.
+Commands are reusable prompts stored as `.md` files inside `.claude/commands/`. They work like Skills but are simpler — just a prompt template with an optional frontmatter header. Invoke them with a `/` slash prefix matching the filename.
 
-The command itself can also receive custom arguments using the $ARGUMENTS in the prompt you can make reference to them.
+Commands support the same frontmatter fields as Skills:
+
+```md
+---
+description: What this command does — shown when searching commands
+allowed-tools: Read, Edit
+---
+
+Your prompt goes here. Use $ARGUMENTS to inject user-provided input.
+```
+
+**Example — a focused PR description generator:**
+
+`.claude/commands/pr-description.md`:
+
+```md
+---
+description: Generate a pull request description based on recent commits
+allowed-tools: Bash
+---
+
+Look at the recent git commits and staged changes.
+
+Generate a clear, concise PR description with:
+- A one-line summary
+- A bullet list of what changed and why
+- Any breaking changes or migration steps
+
+Target branch context: $ARGUMENTS
+```
+
+Invoke it with:
+
+```
+/pr-description main
+```
+
+**Scoping:** Commands placed in `.claude/commands/` are project-scoped. For global commands available in every project, place them in `~/.claude/commands/`.
+
+**Difference from Skills:** Skills have automatic discoverability (Claude can invoke them without being asked) and support `disable-model-invocation` / `user-invocable` flags. Commands are always user-invoked only — think of them as saved slash commands.
+
+## Hooks
+
+Hooks are shell commands that Claude Code executes automatically in response to specific events — before/after tool use, on stop, or on notifications. Unlike Skills or Commands (which Claude runs), hooks are executed by the Claude Code harness itself, so they run regardless of what Claude decides to do.
+
+This makes hooks the right tool for automated behaviors: "every time Claude edits a file, run the linter", "when Claude finishes, play a sound", etc. Memory or preferences cannot fulfill these — only hooks can.
+
+### Configuration
+
+Hooks are defined in `.claude/settings.json` (project-scoped) or `~/.claude/settings.json` (global) under a `"hooks"` key:
+
+```json
+{
+  "hooks": {
+    "<EventName>": [
+      {
+        "matcher": "<tool name or empty string for all>",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<shell command to run>"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Hook Events
+
+| Event | When it fires |
+|-------|--------------|
+| `PreToolUse` | Before Claude calls any tool |
+| `PostToolUse` | After a tool call completes |
+| `Notification` | When Claude sends a notification |
+| `Stop` | When Claude finishes its response |
+
+### Matcher
+
+The `matcher` field filters which tool triggers the hook. Use a tool name (e.g. `"Bash"`, `"Edit"`) to target a specific tool, or an empty string `""` to match all tools.
+
+### Examples
+
+**Run linter after every file edit:**
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint --silent"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Play a sound when Claude stops:**
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Log every Bash command Claude runs:**
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date)] Bash tool triggered\" >> ~/claude-audit.log"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Tips
+
+- Use the `update-config` skill (`/update-config`) to let Claude configure hooks for you in settings.json instead of editing it manually.
+- Hook commands run in the project's working directory.
+- A failing hook (non-zero exit) will surface as a warning but won't stop Claude.
