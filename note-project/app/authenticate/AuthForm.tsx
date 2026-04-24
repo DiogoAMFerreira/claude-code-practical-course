@@ -11,6 +11,7 @@ interface AuthFormProps {
 
 export default function AuthForm({ isSignUp }: AuthFormProps) {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,11 +23,7 @@ export default function AuthForm({ isSignUp }: AuthFormProps) {
     setLoading(true);
 
     const result = isSignUp
-      ? await authClient.signUp.email({
-          email,
-          password,
-          name: email.split("@")[0],
-        })
+      ? await authClient.signUp.email({ email, password, name })
       : await authClient.signIn.email({ email, password });
 
     if (result.error) {
@@ -53,6 +50,27 @@ export default function AuthForm({ isSignUp }: AuthFormProps) {
         </header>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          {isSignUp && (
+            <div className="space-y-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                placeholder="Your name"
+                disabled={loading}
+              />
+            </div>
+          )}
           <div className="space-y-1">
             <label
               htmlFor="email"

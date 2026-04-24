@@ -6,8 +6,11 @@ import { createNote } from "@/app/actions/notes";
 import { useState } from "react";
 import EditorToolbar from "@/app/components/EditorToolbar";
 
+const EMPTY_DOC = { type: "doc", content: [] };
+
 export default function NewNoteForm() {
   const [title, setTitle] = useState("");
+  const [error, setError] = useState("");
 
   const editor = useEditor({
     extensions: [StarterKit.configure({ heading: { levels: [1, 2, 3] } })],
@@ -17,8 +20,10 @@ export default function NewNoteForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const contentJson = JSON.stringify(editor?.getJSON() ?? {});
-    await createNote(title, contentJson);
+    setError("");
+    const contentJson = JSON.stringify(editor?.getJSON() ?? EMPTY_DOC);
+    const result = await createNote(title, contentJson);
+    if (result?.error) setError(result.error);
   }
 
   return (
@@ -37,6 +42,11 @@ export default function NewNoteForm() {
           <EditorContent editor={editor} />
         </div>
       </div>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       <div className="flex justify-end">
         <button
           type="submit"

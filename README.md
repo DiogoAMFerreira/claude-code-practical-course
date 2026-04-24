@@ -311,3 +311,9 @@ A popular and growing (free!) public skills repository is skills.sh.
 There, you find a broad selection of skills you can add to your project. You can install skills from that repository into your project via npx skills add <owner/repo> (requires Node.js to be installed on your system, since npx is a tool installed together with Node.js).
 
 Of course, you can and should explore those skills you installed. You can tweak them or remove selected parts of the skills.
+
+## Creating Commands
+
+The same way you can write Skills and Agents. You can create custom Commands. These are nothing more that simple reusable PROMPT's you can have in your project. You can even define with a custom header the allowed tools and a description to the command. That will help when you search for the command.
+
+The command itself can also receive custom arguments using the $ARGUMENTS in the prompt you can make reference to them.
